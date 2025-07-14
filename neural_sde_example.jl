@@ -35,14 +35,13 @@ neuralsde = NeuralDSDE(drift_dudt, diffusion_dudt, tspan, SOSRI();
 ps, st = Lux.setup(Xoshiro(0), neuralsde)
 ps = ComponentArray(ps)
 
-using Lux.Experimental: StatefulLuxLayer
-import Lux.Experimental
+using Lux: StatefulLuxLayer
 
 # Get the prediction using the correct initial condition
 prediction0 = neuralsde(u0, ps, st)[1]
 
-drift_model = Lux.Experimental.StatefulLuxLayer(drift_dudt, ps.drift, st.drift)
-diffusion_model = StatefulLuxLayer(diffusion_dudt, ps.diffusion, st.diffusion)
+drift_model = StatefulLuxLayer{true}(drift_dudt, ps.drift, st.drift)
+diffusion_model = StatefulLuxLayer{true}(diffusion_dudt, ps.diffusion, st.diffusion)
 
 drift_(u, p, t) = drift_model(u, p.drift)
 diffusion_(u, p, t) = diffusion_model(u, p.diffusion)
@@ -60,7 +59,7 @@ scatter(tsteps, sde_data[1, :]; label = "data")
 scatter!(tsteps, prediction0[1, :]; label = "prediction")
 
 
-neuralsde_model = StatefulLuxLayer(neuralsde, ps, st)
+neuralsde_model = StatefulLuxLayer{true}(neuralsde, ps, st)
 
 function predict_neuralsde(p, u = u0)
     return Array(neuralsde_model(u, p))
@@ -117,7 +116,6 @@ adtype = Optimization.AutoZygote()
 optf = Optimization.OptimizationFunction((x, p) -> loss_neuralsde(x; n = 10), adtype)
 optprob = Optimization.OptimizationProblem(optf, ps)
 result1 = Optimization.solve(optprob, opt; callback, maxiters = 100)
-
 
 opt = OptimizationOptimisers.Adam(0.001)
 optf2 = Optimization.OptimizationFunction((x, p) -> loss_neuralsde(x; n = 1000), adtype)
