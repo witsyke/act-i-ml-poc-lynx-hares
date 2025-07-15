@@ -1,5 +1,7 @@
 using Plots, Statistics, ComponentArrays, Optimization, OptimizationOptimisers, DiffEqFlux,
       StochasticDiffEq, SciMLBase.EnsembleAnalysis, Random
+using Lux: StatefulLuxLayer
+
 
 u0 = Float32[2.0; 0.0]
 datasize = 30
@@ -35,7 +37,6 @@ neuralsde = NeuralDSDE(drift_dudt, diffusion_dudt, tspan, SOSRI();
 ps, st = Lux.setup(Xoshiro(0), neuralsde)
 ps = ComponentArray(ps)
 
-using Lux: StatefulLuxLayer
 
 # Get the prediction using the correct initial condition
 prediction0 = neuralsde(u0, ps, st)[1]
@@ -95,7 +96,7 @@ callback = function (state, loss; doplot = false)
     iter += 1
 
     # loss against current data
-    display(loss)
+    display("epoch = $iter, loss = $loss")
 
     # plot current prediction against data
     plt = Plots.scatter(tsteps, sde_data[1, :]; yerror = sde_data_vars[1, :],
