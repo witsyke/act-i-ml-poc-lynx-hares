@@ -119,9 +119,9 @@ optprob = Optimization.OptimizationProblem(optf, ps)
 result1 = Optimization.solve(optprob, opt; callback, maxiters = 100)
 
 opt = OptimizationOptimisers.Adam(0.001)
-optf2 = Optimization.OptimizationFunction((x, p) -> loss_neuralsde(x; n = 1000), adtype)
+optf2 = Optimization.OptimizationFunction((x, p) -> loss_neuralsde(x; n = 100), adtype)
 optprob2 = Optimization.OptimizationProblem(optf2, result1.u)
-result2 = Optimization.solve(optprob2, opt; callback, maxiters = 1000)
+result2 = Optimization.solve(optprob2, opt; callback, maxiters = 10000)
 
 n = 1000
 u = repeat(reshape(u0, :, 1), 1, n)
